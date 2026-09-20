@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politika e Privatësisë — DayJob</title>
+<meta name="description" content="Politika e privatësisë e DayJob: çfarë të dhënash mbledhim, si i përdorim dhe si i mbrojmë.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0F1A; --ink-2:#131A2E; --surface:#1A2036; --line:#323C5C;
+    --text:#F3F5FA; --text-dim:#B8C0D9; --text-mute:#7C87A8;
+    --amber:#FFB800; --amber-2:#FF7A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    color:var(--text); font-family:'Inter',system-ui,-apple-system,sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:680px; margin:0 auto; padding:32px 20px 64px; }
+  a{ color:var(--amber); }
+  .back{ display:inline-block; margin-bottom:22px; color:var(--text-mute); text-decoration:none; font-size:13.5px; }
+  h1{ font-size:26px; margin:0 0 4px; background:linear-gradient(135deg,var(--amber),var(--amber-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .updated{ color:var(--text-mute); font-size:12.5px; margin-bottom:28px; }
+  h2{ font-size:17px; margin:30px 0 10px; color:var(--text); }
+  p, li{ color:var(--text-dim); font-size:14.5px; }
+  ul{ padding-left:20px; }
+  .callout{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-size:13.5px; color:var(--text-dim); margin:18px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Kthehu te DayJob</a>
+  <h1>Politika e Privatësisë</h1>
+  <div class="updated">Përditësuar më: [PLOTËSO DATËN KUR E PUBLIKON]</div>
+
+  <div class="callout">
+    Ky tekst është një bazë e arsyeshme, jo këshillë juridike. Përpara se ta bësh aplikacionin
+    publik, të rekomandohet ta rishikojë një jurist për përputhshmëri me ligjin shqiptar për
+    mbrojtjen e të dhënave (Ligji Nr. 9887) dhe, nëse ke përdorues në BE, me GDPR-në.
+  </div>
+
+  <h2>1. Kush jemi</h2>
+  <p>DayJob ("ne", "aplikacioni") është një treg pune ditore që lidh punëtorë me biznese për
+  turne të shkurtra. Kjo faqe shpjegon çfarë të dhënash mbledhim kur përdor faqen ose
+  aplikacionin DayJob, dhe si i përdorim.</p>
+  <p>Kontakt: <a href="mailto:[VENDOS-EMAILIN-TËND-KËTU]">[VENDOS-EMAILIN-TËND-KËTU]</a></p>
+
+  <h2>2. Të dhënat që mbledhim</h2>
+  <ul>
+    <li><strong>Të dhëna llogarie:</strong> emër, mbiemër, email, numër telefoni.</li>
+    <li><strong>Të dhëna biznesi</strong> (nëse regjistrohesh si biznes): emri i biznesit, NIPT.</li>
+    <li><strong>Të dhëna aktiviteti:</strong> punët që poston ose aplikon, statusi i aplikimeve,
+    turnet e kryera/anuluara, dhe një rezultat besueshmërie i llogaritur nga këto.</li>
+    <li><strong>Foto e kartës ID</strong> (opsionale): ruhet <em>vetëm lokalisht në pajisjen tënde</em>
+    (localStorage), nuk ngarkohet në serverët tanë.</li>
+    <li><strong>"Portofoli" dhe të dhëna karte:</strong> DayJob ka aktualisht një sistem pagese
+    demonstrimi (shih Kushtet e Përdorimit) — asnjë numër i vërtetë karte nuk ruhet apo
+    përpunohet.</li>
+  </ul>
+
+  <h2>3. Si i përdorim të dhënat</h2>
+  <ul>
+    <li>Për të krijuar dhe menaxhuar llogarinë tënde (Firebase Authentication).</li>
+    <li>Për të shfaqur punët/aplikimet dhe për të lidhur punëtorët me bizneset (Firestore).</li>
+    <li>Për të dërguar njoftime brenda aplikacionit rreth statusit të aplikimeve.</li>
+    <li>Për të llogaritur rezultatin e besueshmërisë (bazuar në turne të kryera/anulime).</li>
+  </ul>
+
+  <h2>4. Me kë i ndajmë të dhënat</h2>
+  <p>Emri, rezultati i besueshmërisë dhe detajet e aplikimit i shfaqen vetëm palës tjetër të
+  përfshirë në atë aplikim specifik (punëtorit ose biznesit përkatës) — jo çdo përdoruesi tjetër
+  të platformës. Nuk i shesim të dhënat e tua palëve të treta.</p>
+  <p>Të dhënat ruhen te <strong>Google Firebase</strong> (Authentication dhe Firestore), i cili
+  shërben si përpunues i të dhënave sipas kushteve të veta të privatësisë.</p>
+
+  <h2>5. Sa i ruajmë të dhënat</h2>
+  <p>Të dhënat e llogarisë ruhen për sa kohë llogaria është aktive. Për të kërkuar fshirjen e
+  llogarisë dhe të dhënave përkatëse, na shkruaj në adresën e kontaktit më sipër.</p>
+
+  <h2>6. Të drejtat e tua</h2>
+  <p>Ke të drejtë të kërkosh akses, korrigjim ose fshirje të të dhënave të tua personale, si dhe
+  të tërheqësh pëlqimin kur përpunimi bazohet në të. Kontakto në adresën më sipër.</p>
+
+  <h2>7. Fëmijët</h2>
+  <p>DayJob synohet për përdorues të moshës madhore (18+) ose siç lejohet nga legjislacioni i
+  punës në juridiksionin tënd. Nuk mbledhim me dijeni të dhëna nga fëmijë nën moshën e lejuar.</p>
+
+  <h2>8. Ndryshime në këtë politikë</h2>
+  <p>Mund ta përditësojmë këtë politikë herë pas here. Data e përditësimit të fundit shfaqet në
+  krye të faqes.</p>
+</div>
+</body>
+</html>

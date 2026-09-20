@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DayJob — Punë e ditës</title>
+<meta name="description" content="Gjej punë për sot, nesër, apo këtë javë — ose posto një punë dhe plotësoje brenda orëve.">
+<meta name="robots" content="index,follow">
+<!-- Replace with your real domain once you've bought one (see SETUP.md) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DayJob">
+<meta property="og:title" content="DayJob — Punë e ditës">
+<meta property="og:description" content="Gjej punë për sot, nesër, apo këtë javë — ose posto një punë dhe plotësoje brenda orëve.">
+<meta property="og:image" content="/icons/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DayJob — Punë e ditës">
+<meta name="twitter:description" content="Gjej punë për sot, nesër, apo këtë javë — ose posto një punë dhe plotësoje brenda orëve.">
+<meta name="twitter:image" content="/icons/icon-512.png">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0B0F1A">
@@ -996,7 +1008,13 @@ function renderProfile(){
     Llogaria jote është reale (Firebase Authentication) dhe të dhënat e punëve/aplikimeve ruhen në një bazë të dhënash të përbashkët (Firestore) — çdo person që hap DayJob i sheh të njëjtat punë dhe aplikimet e veta. Karta e kreditit mbetet vetëm demonstrim (test mode, jo transaksione reale). Foto e kartës ID ruhet vetëm në këtë pajisje.
   </div>
   <div style="height:18px"></div>
-  <button class="btn btn-danger" onclick="logout()">Dil nga llogaria</button>`;
+  <button class="btn btn-danger" onclick="logout()">Dil nga llogaria</button>
+  <div style="height:20px"></div>
+  <div style="display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--text-mute);">
+    <a href="/privacy.html" style="color:inherit;">Privatësia</a>
+    <span>·</span>
+    <a href="/terms.html" style="color:inherit;">Kushtet</a>
+  </div>`;
 }
 
 function renderPostJob(){

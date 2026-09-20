@@ -7,8 +7,8 @@ Auth/Firestore, deployed as a static site on Netlify, and wrapped with
 Capacitor for Android/iOS app store builds.
 
 See **[SETUP.md](./SETUP.md)** for the full walkthrough: deploying the
-website, pushing Firestore security rules, and building the Android/iOS
-apps.
+website, buying and connecting a domain, pushing Firestore security rules,
+and building the Android/iOS apps.
 
 ## Project layout
 
@@ -18,9 +18,13 @@ apps.
 | `public/manifest.json` | PWA manifest (installable "Add to Home Screen")                     |
 | `public/sw.js`         | Service worker — app-shell caching, never caches Firebase traffic   |
 | `public/icons/`        | App icons (placeholders — swap for real art, see SETUP.md §0)       |
+| `public/privacy.html`, `public/terms.html` | Legal pages — required by both app stores, fill in the placeholders (SETUP.md §0) |
+| `public/robots.txt`, `public/sitemap.xml` | Basic SEO — fill in your domain once bought (SETUP.md §0/§2) |
+| `public/404.html`      | Branded not-found page                                              |
+| `netlify.toml`         | Build config + caching/security headers                             |
 | `firestore.rules`      | Firestore security rules — deploy with `firebase deploy --only firestore:rules` |
 | `firebase.json` / `.firebaserc` | Firebase CLI config, pinned to the `daily-job-c351c` project |
-| `capacitor.config.json`| Wraps the live Netlify site as an installable Android/iOS app       |
+| `capacitor.config.json`| Wraps the live site as an installable Android/iOS app               |
 
 ## Commands
 
