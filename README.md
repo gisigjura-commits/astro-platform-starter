@@ -1,10 +1,32 @@
-# Astro on Netlify Platform Starter
+# DayJob — Punë e ditës
 
-[Live Demo](https://astro-platform-starter.netlify.app/)
+A same-day job marketplace: workers find shifts for today/tomorrow/this
+week, businesses post jobs and fill them within hours. Built as a single
+self-contained PWA (`public/index.html`) backed by Firebase
+Auth/Firestore, deployed as a static site on Netlify, and wrapped with
+Capacitor for Android/iOS app store builds.
 
-A modern starter based on Astro.js, Tailwind, and [Netlify Core Primitives](https://docs.netlify.com/core/overview/#develop) (Edge Functions, Image CDN, Blobs).
+See **[SETUP.md](./SETUP.md)** for the full walkthrough: deploying the
+website, buying and connecting a domain, pushing Firestore security rules,
+and building the Android/iOS apps.
 
-## Astro Commands
+## Project layout
+
+| Path                  | What it is                                                          |
+| :--------------------- | :------------------------------------------------------------------- |
+| `public/index.html`    | The whole app — UI, styles, and Firebase client logic in one file   |
+| `public/manifest.json` | PWA manifest (installable "Add to Home Screen")                     |
+| `public/sw.js`         | Service worker — app-shell caching, never caches Firebase traffic   |
+| `public/icons/`        | App icons (placeholders — swap for real art, see SETUP.md §0)       |
+| `public/privacy.html`, `public/terms.html` | Legal pages — required by both app stores, fill in the placeholders (SETUP.md §0) |
+| `public/robots.txt`, `public/sitemap.xml` | Basic SEO — fill in your domain once bought (SETUP.md §0/§2) |
+| `public/404.html`      | Branded not-found page                                              |
+| `netlify.toml`         | Build config + caching/security headers                             |
+| `firestore.rules`      | Firestore security rules — deploy with `firebase deploy --only firestore:rules` |
+| `firebase.json` / `.firebaserc` | Firebase CLI config, pinned to the `daily-job-c351c` project |
+| `capacitor.config.json`| Wraps the live site as an installable Android/iOS app               |
+
+## Commands
 
 All commands are run from the root of the project, from a terminal:
 
@@ -14,30 +36,17 @@ All commands are run from the root of the project, from a terminal:
 | `npm run dev`             | Starts local dev server at `localhost:4321`      |
 | `npm run build`           | Build your production site to `./dist/`          |
 | `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## Deploying to Netlify
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/astro-platform-starter)
-
-## Developing Locally
+## Developing locally
 
 | Prerequisites                                                                |
 | :--------------------------------------------------------------------------- |
 | [Node.js](https://nodejs.org/) v18.20.8+.                                    |
-| (optional) [nvm](https://github.com/nvm-sh/nvm) for Node version management. |
 
 1. Clone this repository, then run `npm install` in its root directory.
+2. Run `npm run dev` and open `http://localhost:4321`.
 
-2. Recommended: link your local repository to a Netlify project. This will ensure you're using the same runtime version for both local development and your deployed project.
-
-```
-netlify link
-```
-
-3. Run the Astro.js development server:
-
-```
-npm run dev
-```
+Because the app is a static file talking directly to Firebase, `npm run
+dev` is just Astro serving `public/` — no backend to run locally. Sign-in
+will only work once `localhost` (or whatever port Astro picks) is added to
+Firebase Console → Authentication → Settings → Authorized domains.

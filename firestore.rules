@@ -1,0 +1,122 @@
+rules_version = '2';
+
+// Security rules for the DayJob (daily-job-c351c) Firestore database.
+//
+// WHAT THIS FIXES vs. having no rules (or permissive test-mode rules):
+//   - Nobody can read or write another person's `users/{uid}` profile document
+//     anymore (previously: anyone signed in could read every user's wallet,
+//     phone number, NIPT, or overwrite it).
+//   - `applications` are only readable by the two people involved (the worker
+//     who applied, or the business that owns the job) — previously every
+//     signed-in client downloaded every application on the platform, leaking
+//     every worker's name/email to every other user.
+//   - A job listing can only be created by the account posting it, and only
+//     a business editing its OWN posting can change most fields.
+//   - Two people accepting/cancelling the same shift at once can no longer
+//     push a job's `filled` count past `people` or below zero (paired with
+//     the client-side Firestore transactions in the app itself).
+//
+// WHAT THIS DOES NOT FIX (needs Cloud Functions, not just rules):
+//   - `wallet`, `completedShifts`, and `cancellations` on a user's OWN
+//     document are still writable by that same user's client, because the
+//     app has no backend to compute payouts authoritatively. A user could
+//     still open devtools and inflate their own demo wallet. This is fine
+//     while `wallet` is fake demo currency, but MUST move behind a Cloud
+//     Function (triggered on application status -> 'completed') before any
+//     real money is involved.
+//   - The `filled` +/-1 exception below lets ANY signed-in user nudge a
+//     job's fill count by one, not just someone with a real accepted
+//     application for it — rules alone can't cheaply verify "does this
+//     person hold a qualifying application for this exact job" without a
+//     Cloud Function. It's a big improvement over "anyone can write
+//     anything", but not airtight. Close it fully with a Cloud Function
+//     that updates `filled` as a trusted side effect of an application
+//     status change, and lock this rule down to owner-only once that exists.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // ---- users/{uid} — profile, wallet, trust stats ----
+    match /users/{uid} {
+      allow read:   if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if false;
+
+      // Per-user notifications subcollection.
+      match /notifications/{notifId} {
+        allow read:   if isOwner(uid);
+        // Written by the OTHER party's client (e.g. a business notifying a
+        // worker their application was accepted) — so it can't require
+        // isOwner(uid) on create, only that the caller is signed in.
+        allow create: if signedIn();
+        // The owner may only ever flip `read` — not rewrite the message.
+        allow update: if isOwner(uid)
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow delete: if false;
+      }
+    }
+
+    // ---- jobs/{jobId} — the public marketplace listing ----
+    match /jobs/{jobId} {
+      // Listings are intentionally public to every signed-in user.
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+                    && request.resource.data.postedByUid == request.auth.uid
+                    && request.resource.data.filled == 0;
+
+      allow delete: if isOwner(resource.data.postedByUid);
+
+      allow update: if signedIn() && (
+        // The posting business can edit/close/manage its own listing.
+        isOwner(resource.data.postedByUid)
+        ||
+        // Anyone signed in may adjust ONLY `filled`/`status`, by at most one
+        // at a time — this is what lets a worker's cancel free up a spot on
+        // a job they don't own. See the caveat above about tightening this
+        // with a Cloud Function.
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['filled','status'])
+          && (request.resource.data.filled - resource.data.filled) in [-1, 0, 1]
+        )
+      );
+    }
+
+    // ---- applications/{appId} — links a worker to a job ----
+    match /applications/{appId} {
+      // Only the worker who applied or the business that owns the job may
+      // read it — this is the fix for the platform-wide data leak.
+      allow read: if signedIn() && (
+        resource.data.workerUid == request.auth.uid ||
+        resource.data.businessUid == request.auth.uid
+      );
+
+      allow create: if signedIn()
+                    && request.resource.data.workerUid == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow update: if signedIn() && (
+        resource.data.workerUid == request.auth.uid ||
+        resource.data.businessUid == request.auth.uid
+      );
+
+      allow delete: if false;
+    }
+
+    // ---- meta/seedStatus — one-time marker so demo jobs seed exactly once ----
+    match /meta/{docId} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

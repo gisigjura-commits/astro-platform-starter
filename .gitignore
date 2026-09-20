@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+
+# Capacitor native projects (generated locally via `npx cap add`)
+/android
+/ios
