@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DayJob — Punë e ditës</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0B0F1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DayJob">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0F1A;
+    --ink-2:#131A2E;
+    --surface:#1A2036;
+    --surface-2:#222A45;
+    --line:#323C5C;
+    --text:#F3F5FA;
+    --text-dim:#B8C0D9;
+    --text-mute:#7C87A8;
+    --amber:#FFB800;
+    --amber-2:#FF7A1A;
+    --amber-ink:#2B1600;
+    --teal:#22D3B8;
+    --teal-2:#0EA5A0;
+    --violet:#7C6CF6;
+    --danger:#FF5C6C;
+    --grad-primary: linear-gradient(135deg, var(--amber) 0%, var(--amber-2) 100%);
+    --grad-teal: linear-gradient(135deg, #2FE0C8 0%, var(--teal-2) 100%);
+    --grad-bg: radial-gradient(ellipse 120% 60% at 15% -10%, rgba(124,108,246,0.28), transparent 55%),
+               radial-gradient(ellipse 100% 55% at 100% 0%, rgba(255,122,26,0.16), transparent 50%),
+               radial-gradient(ellipse 90% 60% at 50% 110%, rgba(34,211,184,0.14), transparent 55%),
+               linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    --radius-card:14px;
+    --radius-pill:999px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing:border-box;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --ink:#F3EFE6;
+      --surface:#FFFFFF;
+      --surface-2:#F1EDE3;
+      --line:#DED8C9;
+      --text:#221F1A;
+      --text-dim:#5A5548;
+      --text-mute:#8B8578;
+      --amber-ink:#241D06;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#0B0F1A; --surface:#1A2036; --surface-2:#222A45; --line:#323C5C;
+    --text:#F3F5FA; --text-dim:#B8C0D9; --text-mute:#7C87A8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%; margin:0;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    background:var(--grad-bg);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  .disp{ font-family:'Barlow Condensed',system-ui,sans-serif; font-weight:800; letter-spacing:0.2px; }
+  #app{ display:flex; flex-direction:column; height:100%; max-width:560px; margin:0 auto; position:relative; }
+
+  /* ---- top bar ---- */
+  .topbar{
+    padding: calc(14px + env(safe-area-inset-top,0px)) 16px 10px;
+    background:linear-gradient(180deg, rgba(11,15,26,0.92) 60%, rgba(11,15,26,0.75));
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    position:sticky; top:0; z-index:5;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .topbar-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
+  .brand{ display:flex; align-items:center; gap:8px; }
+  .brand-mark{ width:30px; height:30px; border-radius:8px; background:var(--grad-primary); box-shadow:0 4px 14px rgba(255,122,26,0.35); color:var(--amber-ink); display:flex; align-items:center; justify-content:center; font-family:'Barlow Condensed'; font-weight:800; font-size:16px; }
+  .brand-name{ font-family:'Barlow Condensed'; font-weight:800; font-size:21px; letter-spacing:0.3px; }
+  .bell{ position:relative; width:38px; height:38px; border-radius:var(--radius-pill); background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:17px; color:var(--text); }
+  .bell .dot{ position:absolute; top:6px; right:7px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:2px solid var(--ink); }
+
+  .search{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:11px 14px;
+  }
+  .search input{
+    flex:1; border:none; outline:none; background:transparent; color:var(--text);
+    font-size:15px; font-family:'Inter'; font-weight:500;
+  }
+  .search input::placeholder{ color:var(--text-mute); }
+  .search .ic{ color:var(--text-mute); font-size:15px; }
+
+  /* letter strip */
+  .letters{ display:flex; gap:6px; overflow-x:auto; padding:12px 2px 2px; scrollbar-width:none; }
+  .letters::-webkit-scrollbar{ display:none; }
+  .letter-btn{
+    flex:0 0 auto; min-width:30px; height:30px; padding:0 3px;
+    border-radius:8px; border:1px solid var(--line); background:var(--surface);
+    color:var(--text-mute); font-family:'Barlow Condensed'; font-weight:700; font-size:14px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .letter-btn.has{ color:var(--text); border-color:var(--line); }
+  .letter-btn.active{ background:var(--grad-primary); border-color:transparent; color:var(--amber-ink); box-shadow:0 3px 10px rgba(255,122,26,0.35); }
+
+  /* filter chips */
+  .chiprow{ display:flex; gap:8px; overflow-x:auto; padding:12px 2px 2px; scrollbar-width:none; }
+  .chiprow::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto; padding:7px 13px; border-radius:var(--radius-pill); border:1px solid var(--line);
+    background:var(--surface); color:var(--text-dim); font-size:13px; font-weight:600; cursor:pointer;
+    white-space:nowrap; display:flex; align-items:center; gap:6px;
+  }
+  .chip.active{ background:var(--grad-teal); color:#04201C; border-color:transparent; box-shadow:0 3px 10px rgba(34,211,184,0.3); }
+  .chip .sw{ width:8px; height:8px; border-radius:50%; }
+
+  /* ---- content ---- */
+  .content{ flex:1; overflow-y:auto; padding:6px 16px 100px; }
+  .section-label{ font-size:12px; font-weight:700; color:var(--text-mute); text-transform:none; margin:18px 0 10px; }
+
+  .job-card{
+    background:linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 60%), var(--surface);
+    border:1px solid var(--line); border-radius:var(--radius-card);
+    padding:14px; margin-bottom:10px; display:flex; gap:12px; cursor:pointer; position:relative;
+    border-left:4px solid var(--cat, var(--amber));
+    box-shadow:0 6px 18px rgba(0,0,0,0.28);
+  }
+  .job-main{ flex:1; min-width:0; }
+  .job-top{ display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .job-title{ font-size:16px; font-weight:700; line-height:1.25; }
+  .job-pay{ font-family:'Barlow Condensed'; font-weight:800; font-size:19px; background:var(--grad-primary); -webkit-background-clip:text; background-clip:text; color:transparent; white-space:nowrap; }
+  .job-sub{ font-size:13px; color:var(--text-dim); margin-top:3px; }
+  .job-meta{ display:flex; gap:8px; margin-top:9px; flex-wrap:wrap; }
+  .tag{ font-size:11.5px; font-weight:600; padding:4px 9px; border-radius:var(--radius-pill); background:var(--surface-2); color:var(--text-dim); }
+  .tag.day{ color:var(--teal); }
+  .tag.people{ color:var(--text-mute); }
+  .empty{ text-align:center; padding:60px 20px; color:var(--text-mute); }
+  .empty .big{ font-size:34px; margin-bottom:10px; }
+
+  /* ---- bottom nav ---- */
+  .navbar{
+    position:sticky; bottom:0; z-index:6;
+    background:linear-gradient(0deg, rgba(11,15,26,0.95) 60%, rgba(11,15,26,0.8));
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex; padding: 8px 6px calc(8px + env(safe-area-inset-bottom,0px));
+  }
+  .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border:none; background:none; color:var(--text-mute); font-family:'Inter'; font-size:11px; font-weight:600; cursor:pointer; }
+  .nav-btn .ic{ font-size:19px; }
+  .nav-btn.active{ color:var(--amber); text-shadow:0 0 16px rgba(255,184,0,0.45); }
+
+  /* ---- overlay / sheet ---- */
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:20; display:flex; align-items:flex-end; justify-content:center; }
+  .overlay.hidden{ display:none; }
+  .sheet{
+    background:var(--ink); width:100%; max-width:560px; max-height:88vh; overflow-y:auto;
+    border-radius:20px 20px 0 0; padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px));
+    border-top:1px solid var(--line);
+  }
+  .sheet-handle{ width:40px; height:4px; background:var(--line); border-radius:2px; margin:0 auto 14px; }
+  .sheet-close{ position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:var(--surface); border:1px solid var(--line); color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; }
+
+  h2.title{ font-family:'Barlow Condensed'; font-size:26px; font-weight:800; margin:2px 0 4px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--text-mute); margin-bottom:6px; }
+  .field input, .field select{
+    width:100%; padding:12px 13px; border-radius:10px; border:1px solid var(--line);
+    background:var(--surface); color:var(--text); font-size:15px; font-family:'Inter'; font-weight:500; outline:none;
+  }
+  .field input[type=file]{ padding:9px; font-size:13px; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px; border-radius:12px; border:none; font-size:15px; font-weight:700;
+    cursor:pointer; width:100%; font-family:'Inter';
+  }
+  .btn-primary{ background:var(--grad-primary); color:var(--amber-ink); box-shadow:0 6px 18px rgba(255,122,26,0.35); }
+  .btn-primary:active{ filter:brightness(0.95); }
+  .btn-ghost{ background:var(--surface); color:var(--text); border:1px solid var(--line); }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid var(--danger); }
+  .btn-sm{ padding:9px 14px; font-size:13px; width:auto; }
+
+  .role-toggle{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:4px; gap:4px; margin-bottom:18px; }
+  .role-toggle button{ flex:1; padding:10px; border-radius:9px; border:none; background:none; color:var(--text-dim); font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter'; }
+  .role-toggle button.active{ background:var(--grad-primary); color:var(--amber-ink); box-shadow:0 4px 14px rgba(255,122,26,0.3); }
+
+  .avatar{ width:56px; height:56px; border-radius:50%; object-fit:cover; background:var(--surface-2); box-shadow:0 0 0 3px rgba(255,184,0,0.18); }
+  .profile-head{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .profile-head .info .name{ font-size:18px; font-weight:800; }
+  .profile-head .info .sub{ font-size:12.5px; color:var(--text-mute); margin-top:2px; }
+  .row-item{ display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .row-item .k{ color:var(--text-mute); }
+  .row-item .v{ font-weight:600; }
+
+  .status-pill{ font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:var(--radius-pill); }
+  .status-pending{ background:#3B3407; color:#F5D95E; }
+  .status-accepted{ background:#0E3B34; color:#5EE0C9; }
+  .status-rejected{ background:#3B1210; color:#F08A78; }
+  :root:not([data-theme="dark"]) .status-pending{ background:#FCEFC7; color:#8A6D00; }
+  :root:not([data-theme="dark"]) .status-accepted{ background:#D9F3EC; color:#0E6E5C; }
+  :root:not([data-theme="dark"]) .status-rejected{ background:#FBDFD9; color:#B23A22; }
+
+  .app-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-card); padding:14px; margin-bottom:10px; }
+  .app-card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
+  .app-card .jt{ font-weight:700; font-size:15px; }
+  .app-card .meta{ font-size:12.5px; color:var(--text-mute); }
+
+  .toast{
+    position:fixed; left:50%; bottom:110px; transform:translateX(-50%);
+    background:var(--text); color:var(--ink); padding:11px 18px; border-radius:var(--radius-pill);
+    font-size:13.5px; font-weight:700; z-index:40; box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
+  }
+  .toast.show{ opacity:1; }
+
+  .notif-item{ display:flex; gap:11px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .notif-item .dot2{ width:8px; height:8px; border-radius:50%; background:var(--amber); margin-top:6px; flex:0 0 auto; }
+  .notif-item.read .dot2{ background:var(--line); }
+  .notif-item .txt{ font-size:14px; line-height:1.4; }
+  .notif-item .time{ font-size:11.5px; color:var(--text-mute); margin-top:3px; }
+
+  .onboard{ display:flex; flex-direction:column; justify-content:center; min-height:100%; padding:32px 26px calc(32px + env(safe-area-inset-bottom,0px)); background:var(--grad-bg); }
+  .onboard .brand-mark{ width:56px; height:56px; font-size:28px; border-radius:16px; margin-bottom:18px; }
+  .onboard h1{ font-family:'Barlow Condensed'; font-size:38px; font-weight:800; margin:0 0 8px; line-height:1.05; }
+  .onboard p.lead{ color:var(--text-dim); font-size:15px; line-height:1.5; margin-bottom:30px; }
+  .role-card{ display:flex; align-items:center; gap:14px; padding:16px; border-radius:14px; border:1.5px solid var(--line); background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0) 60%), var(--surface); margin-bottom:12px; cursor:pointer; box-shadow:0 8px 22px rgba(0,0,0,0.3); }
+  .role-card .ic{ font-size:26px; }
+  .role-card .t{ font-weight:700; font-size:15.5px; }
+  .role-card .d{ font-size:12.5px; color:var(--text-mute); margin-top:2px; }
+
+  ::selection{ background:var(--amber); color:var(--amber-ink); }
+
+  .secure-box{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
+  .secure-head{ display:flex; align-items:center; gap:8px; margin-bottom:12px; font-weight:700; font-size:14px; }
+  .secure-head .lock{ font-size:15px; }
+  .secure-badge{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--teal); background:rgba(47,167,154,0.12); padding:4px 9px; border-radius:var(--radius-pill); margin-left:auto; }
+  .card-visual{ background:linear-gradient(135deg, #2A2350 0%, #171029 60%, #0B0F1A 100%); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-bottom:14px; color:var(--text); box-shadow:0 10px 30px rgba(124,108,246,0.18); }
+  .card-visual .num{ font-family:'Barlow Condensed'; font-size:19px; letter-spacing:2px; margin:14px 0 10px; }
+  .card-visual .row{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-mute); }
+  .test-banner{ background:rgba(245,180,0,0.12); border:1px solid rgba(245,180,0,0.4); color:var(--amber); font-size:12px; font-weight:700; padding:8px 12px; border-radius:9px; margin-bottom:14px; text-align:center; }
+  .verify-steps{ font-size:12.5px; color:var(--text-mute); line-height:1.7; margin-top:4px; }
+  .verify-steps b{ color:var(--text-dim); }
+
+  .score-badge{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; padding:4px 10px; border-radius:var(--radius-pill); background:var(--surface-2); color:var(--text); }
+  .score-badge.top{ background:var(--grad-primary); color:var(--amber-ink); box-shadow:0 3px 10px rgba(255,122,26,0.3); }
+  .wallet-card{ background:linear-gradient(135deg, #0E5C52 0%, #0A3F3A 55%, #0B0F1A 100%); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow:0 10px 30px rgba(34,211,184,0.16); }
+  .wallet-card .lbl{ font-size:12px; color:var(--text-mute); font-weight:700; }
+  .wallet-card .amt{ font-family:'Barlow Condensed'; font-size:32px; font-weight:800; color:var(--text); margin:4px 0 12px; }
+  .stat-row{ display:flex; gap:10px; margin-bottom:16px; }
+  .stat-box{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center; }
+  .stat-box .n{ font-family:'Barlow Condensed'; font-size:22px; font-weight:800; }
+  .stat-box .l{ font-size:11px; color:var(--text-mute); font-weight:600; margin-top:2px; }
+  .stars{ display:flex; gap:6px; margin-top:8px; }
+  .stars button{ border:1px solid var(--line); background:var(--surface); color:var(--text-dim); width:34px; height:34px; border-radius:9px; font-size:15px; cursor:pointer; }
+  .stars button:hover{ border-color:var(--amber); color:var(--amber); }
+  .action-row{ display:flex; gap:8px; margin-top:10px; }
+  .action-row .btn{ flex:1; }
+  .file-btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px 13px; border-radius:10px; border:1px dashed var(--line); background:var(--surface); color:var(--text-dim); font-size:14px; font-weight:600; cursor:pointer; box-sizing:border-box; }
+  .file-btn:active{ background:var(--surface-2); }
+  .file-btn.has-file{ border-style:solid; border-color:var(--teal); color:var(--teal); }
+  input[type=file].visually-hidden{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
+  collection, query, orderBy, limit, where, increment, runTransaction
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXivkFY9doZQvkcM92ZNozjUjM40SU3Mg",
+  authDomain: "daily-job-c351c.firebaseapp.com",
+  projectId: "daily-job-c351c",
+  storageBucket: "daily-job-c351c.firebasestorage.app",
+  messagingSenderId: "462868073111",
+  appId: "1:462868073111:web:803ee06a3505da58e9b7d2",
+  measurementId: "G-MNFX3RNZES"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+/* ---------------------------------------------------------------- */
+/* DATA                                                              */
+/* ---------------------------------------------------------------- */
+const CATS = {
+  kuzhine:   {label:"Kuzhinë & Restorant", color:"#E4572E"},
+  ndertim:   {label:"Ndërtim & Ngrohje",   color:"#F4A261"},
+  pastrim:   {label:"Pastrim",             color:"#2FA79A"},
+  transport: {label:"Transport & Dërgesa", color:"#3A86FF"},
+  eventet:   {label:"Evente",              color:"#8E7CC3"},
+  magazine:  {label:"Magazinë",            color:"#F5B400"},
+  kujdes:    {label:"Kujdes & Ndihmë",     color:"#E07A9E"},
+  shitje:    {label:"Shitje & Rrogtar",    color:"#6FBF73"}
+};
+const CITIES = ["Tiranë","Durrës","Vlorë","Shkodër","Elbasan","Fier","Korçë"];
+const LETTERS = "ABCÇDEËFGHIJKLMNOPQRSTUVXYZ".split("");
+
+const SEED_JOBS = [
+  {title:"Ndihmës kuzhine për fundjavë", company:"Restorant Liri", cat:"kuzhine", city:"Tiranë", day:"sot", pay:600, hours:6, people:3, filled:1},
+  {title:"Kamarier eventi mbrëmjeje", company:"Sofra Events", cat:"eventet", city:"Tiranë", day:"nesër", pay:700, hours:5, people:2, filled:0},
+  {title:"Banakier kafeje", company:"Kafe Molla", cat:"kuzhine", city:"Durrës", day:"sot", pay:550, hours:8, people:1, filled:0},
+  {title:"Punëtor ndërtimi — muraturë", company:"Alba Construction", cat:"ndertim", city:"Tiranë", day:"javë", pay:1200, hours:8, people:5, filled:2},
+  {title:"Elektricist ndihmës", company:"ElektroPro", cat:"ndertim", city:"Fier", day:"nesër", pay:1000, hours:7, people:1, filled:0},
+  {title:"Çisternë ngrohje — instalim", company:"TermoShpejt", cat:"ndertim", day:"sot", city:"Elbasan", pay:1100, hours:6, people:2, filled:1},
+  {title:"Dado pastrimi zyre", company:"CleanCo Albania", cat:"pastrim", city:"Tiranë", day:"sot", pay:500, hours:4, people:4, filled:0},
+  {title:"Ekip pastrimi pas ndërtimi", company:"CleanCo Albania", cat:"pastrim", city:"Vlorë", day:"javë", pay:650, hours:6, people:3, filled:1},
+  {title:"Furnizues qeni — shëtitje", company:"PetPals", cat:"kujdes", city:"Tiranë", day:"nesër", pay:400, hours:3, people:2, filled:0},
+  {title:"Gjirafë reklamash — hostesë", company:"AdWalk", cat:"eventet", city:"Tiranë", day:"sot", pay:800, hours:5, people:1, filled:0},
+  {title:"Hamall magazine", company:"LogiPort", cat:"magazine", city:"Durrës", day:"sot", pay:700, hours:8, people:6, filled:3},
+  {title:"Inventarist stoku", company:"MegaMarket", cat:"magazine", city:"Tiranë", day:"nesër", pay:600, hours:6, people:2, filled:0},
+  {title:"Jastëk-mbushës eventi", company:"DecorEvents", cat:"eventet", city:"Shkodër", day:"javë", pay:550, hours:4, people:2, filled:0},
+  {title:"Kamionçinist dërgesash", company:"ExpressAL", cat:"transport", city:"Tiranë", day:"sot", pay:900, hours:8, people:3, filled:1},
+  {title:"Korrier me motor", company:"QuickDrop", cat:"transport", city:"Vlorë", day:"sot", pay:650, hours:6, people:4, filled:2},
+  {title:"Larës pjatash", company:"Restorant Liri", cat:"kuzhine", city:"Tiranë", day:"nesër", pay:500, hours:6, people:2, filled:0},
+  {title:"Llogaritar ndihmës për ditë", company:"BizSupport", cat:"shitje", city:"Tiranë", day:"javë", pay:1000, hours:6, people:1, filled:0},
+  {title:"Merchandiser dyqani", company:"MegaMarket", cat:"shitje", city:"Elbasan", day:"sot", pay:600, hours:6, people:3, filled:0},
+  {title:"Ndihmës kujdestar i moshuarish", company:"CareLine", cat:"kujdes", city:"Tiranë", day:"nesër", pay:750, hours:8, people:1, filled:0},
+  {title:"Operator pastrimi vitrinash", company:"CleanCo Albania", cat:"pastrim", city:"Fier", day:"sot", pay:520, hours:5, people:2, filled:0},
+  {title:"Përgatitës pica", company:"Pizza Toka", cat:"kuzhine", city:"Korçë", day:"sot", pay:580, hours:7, people:2, filled:1},
+  {title:"Promotore produkti", company:"AdWalk", cat:"eventet", city:"Durrës", day:"javë", pay:700, hours:5, people:2, filled:0},
+  {title:"Ruajtës parkimi eventi", company:"Sofra Events", cat:"eventet", city:"Tiranë", day:"nesër", pay:600, hours:6, people:3, filled:0},
+  {title:"Shitës në pikë shitjeje", company:"MegaMarket", cat:"shitje", city:"Tiranë", day:"sot", pay:620, hours:8, people:4, filled:2},
+  {title:"Transportues mobiljesh", company:"MoveIt AL", cat:"transport", city:"Tiranë", day:"javë", pay:950, hours:7, people:4, filled:1},
+  {title:"Ushqim-shpërndarës me biçikletë", company:"QuickDrop", cat:"transport", city:"Shkodër", day:"sot", pay:600, hours:5, people:3, filled:0},
+  {title:"Vullnetar ndihmës eventi bamirësie", company:"DecorEvents", cat:"eventet", city:"Tiranë", day:"javë", pay:450, hours:4, people:5, filled:2},
+  {title:"Zbukurues tavolinash dasme", company:"DecorEvents", cat:"eventet", city:"Vlorë", day:"nesër", pay:680, hours:5, people:2, filled:0}
+];
+
+/* ---------------------------------------------------------------- */
+/* STATE                                                              */
+/* ---------------------------------------------------------------- */
+function uid(){ return Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,6); }
+
+let currentUid = null;
+let unsubJobs = null, unsubApps = null, unsubNotifs = null, unsubProfile = null;
+let seedAttempted = false;
+
+let state = {
+  screen: 'loading',      // loading | onboard | register | login | home | activity | profile | postJob | notifications
+  role: null,             // 'worker' | 'business'
+  profile: {},
+  jobs: [],
+  applications: [],
+  notifications: [],
+  search: "",
+  filterCat: null,
+  filterCity: null,
+  filterDay: null,
+  filterLetter: null,
+  sort: "kohe",
+  activeJobId: null,
+  authError: ""
+};
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+/* ---------------------------------------------------------------- */
+/* AUTH BOOTSTRAP                                                     */
+/* ---------------------------------------------------------------- */
+onAuthStateChanged(auth, async (user) => {
+  detachListeners();
+  if(!user){
+    currentUid = null;
+    state.role = null; state.profile = {};
+    state.screen = state.screen==='login' ? 'login' : 'onboard';
+    render();
+    return;
+  }
+  currentUid = user.uid;
+  try{
+    const snap = await getDoc(doc(db,'users',currentUid));
+    if(!snap.exists()){
+      // shouldn't normally happen, but guard: send back to registration
+      state.screen = 'onboard';
+      render();
+      return;
+    }
+    const data = snap.data();
+    state.role = data.role;
+    state.profile = data;
+    state.screen = 'home';
+    render();
+    attachListeners();
+  }catch(e){
+    toast('Gabim në lidhjen me serverin: '+e.message);
+    state.screen = 'onboard';
+    render();
+  }
+});
+
+function detachListeners(){
+  if(unsubJobs){ unsubJobs(); unsubJobs=null; }
+  if(unsubApps){ unsubApps(); unsubApps=null; }
+  if(unsubNotifs){ unsubNotifs(); unsubNotifs=null; }
+  if(unsubProfile){ unsubProfile(); unsubProfile=null; }
+}
+
+function attachListeners(){
+  // Jobs are the public marketplace — everyone reads the same set, capped for cost/performance.
+  unsubJobs = onSnapshot(query(collection(db,'jobs'), orderBy('createdAt','desc'), limit(500)), (snap) => {
+    const jobs = [];
+    snap.forEach(d => jobs.push({id:d.id, ...d.data()}));
+    state.jobs = jobs;
+    if(jobs.length===0 && !seedAttempted){
+      seedAttempted = true;
+      seedJobsOnce();
+    }
+    if(['home','activity'].includes(state.screen)) render();
+  }, (err)=> toast('Gabim leximi punësh: '+err.message));
+
+  // Applications contain other people's names/emails — only fetch the ones this
+  // account is actually a party to (as the worker, or as the hiring business).
+  const appsQuery = state.role === 'business'
+    ? query(collection(db,'applications'), where('businessUid','==',currentUid))
+    : query(collection(db,'applications'), where('workerUid','==',currentUid));
+  unsubApps = onSnapshot(appsQuery, (snap) => {
+    const apps = [];
+    snap.forEach(d => apps.push({id:d.id, ...d.data()}));
+    state.applications = apps;
+    if(state.screen==='activity') render();
+  }, (err)=> toast('Gabim leximi aplikimesh: '+err.message));
+
+  unsubNotifs = onSnapshot(
+    query(collection(db,'users',currentUid,'notifications'), orderBy('createdAt','desc'), limit(100)),
+    (snap) => {
+      const notifs = [];
+      snap.forEach(d => notifs.push({id:d.id, ...d.data()}));
+      state.notifications = notifs;
+      render();
+    }, (err)=> toast('Gabim leximi njoftimesh: '+err.message)
+  );
+
+  unsubProfile = onSnapshot(doc(db,'users',currentUid), (d) => {
+    if(d.exists()){
+      state.profile = d.data();
+      state.role = state.profile.role;
+      if(state.screen==='profile' || state.screen==='postJob') render();
+    }
+  });
+}
+
+// Seeds the demo jobs exactly once, ever, using a transaction on a marker
+// document so two clients that both see an empty list at the same moment
+// can't both seed (which previously produced duplicate listings).
+async function seedJobsOnce(){
+  try{
+    const seedRef = doc(db,'meta','seedStatus');
+    let shouldSeed = false;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(seedRef);
+      if(!snap.exists()){
+        tx.set(seedRef, { seededAt: Date.now(), seededBy: currentUid });
+        shouldSeed = true;
+      }
+    });
+    if(!shouldSeed) return;
+    for(const j of SEED_JOBS){
+      const id = uid();
+      await setDoc(doc(db,'jobs',id), {
+        ...j, postedByUid: currentUid, postedByName: j.company,
+        isSeed: true, status: 'open', createdAt: Date.now()
+      });
+    }
+  }catch(e){ /* silent — seeding is a convenience, not critical */ }
+}
+
+/* ---------------------------------------------------------------- */
+/* DERIVED DATA                                                      */
+/* ---------------------------------------------------------------- */
+function letterCounts(){
+  const counts = {};
+  LETTERS.forEach(l => counts[l]=0);
+  state.jobs.forEach(j => {
+    const l = (j.title[0]||"").toUpperCase();
+    if(counts[l]!==undefined) counts[l]++;
+  });
+  return counts;
+}
+
+function filteredJobs(){
+  let list = state.jobs.filter(j => j.status !== 'closed');
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(j => j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || CATS[j.cat].label.toLowerCase().includes(q));
+  }
+  if(state.filterLetter) list = list.filter(j => (j.title[0]||"").toUpperCase()===state.filterLetter);
+  if(state.filterCat) list = list.filter(j => j.cat===state.filterCat);
+  if(state.filterCity) list = list.filter(j => j.city===state.filterCity);
+  if(state.filterDay) list = list.filter(j => j.day===state.filterDay);
+  if(state.sort==='paga') list.sort((a,b)=> b.pay-a.pay);
+  else if(state.sort==='vende') list.sort((a,b)=> (b.people-b.filled)-(a.people-a.filled));
+  return list;
+}
+
+function myApplications(){
+  return state.applications.filter(a => a.workerUid === currentUid);
+}
+function myPostedJobs(){
+  return state.jobs.filter(j => j.postedByUid === currentUid);
+}
+
+/* ---- reliability score & badges (Wonolo Score / Instawork Top Pro style) ---- */
+function computeScore(p){
+  const base = 5 - (p.cancellations||0)*0.4;
+  return Math.max(1, Math.min(5, base)).toFixed(1);
+}
+function getBadge(p){
+  const shifts = p.completedShifts||0;
+  const score = parseFloat(computeScore(p));
+  if(shifts===0) return {label:'Profil i ri', cls:''};
+  if(shifts>=5 && score>=4.5) return {label:'⭐ Punëtor i Besuar', cls:'top'};
+  if(score<3) return {label:'Besueshmëri e ulët', cls:''};
+  return {label:'Aktiv', cls:''};
+}
+
+/* ---------------------------------------------------------------- */
+/* RENDER                                                            */
+/* ---------------------------------------------------------------- */
+const app = document.getElementById('app');
+
+function render(){
+  if(state.screen==='loading'){ app.innerHTML = `<div class="onboard"><div class="brand-mark" style="width:44px;height:44px;font-size:20px;">D</div><p class="lead">Duke u lidhur...</p></div>`; return; }
+  if(state.screen==='onboard'){ app.innerHTML = renderOnboard(); return; }
+  if(state.screen==='register'){ app.innerHTML = renderRegister(); return; }
+  if(state.screen==='login'){ app.innerHTML = renderLogin(); return; }
+  app.innerHTML = `
+    ${renderTopbar()}
+    <div class="content" id="content">${renderContent()}</div>
+    ${renderNav()}
+    ${renderOverlay()}
+  `;
+  const c = document.getElementById('content');
+  if(c && state._scrollTop!==undefined) c.scrollTop = state._scrollTop;
+}
+
+function renderOnboard(){
+  return `
+  <div class="onboard">
+    <div class="brand-mark">D</div>
+    <h1>DayJob</h1>
+    <p class="lead">Gjej punë për sot, nesër, apo këtë javë — ose posto një punë dhe plotësoje brenda orëve. Pa CV, pa pritje.</p>
+    <div class="role-card" onclick="chooseRole('worker')">
+      <div class="ic">🧰</div>
+      <div><div class="t">Jam duke kërkuar punë</div><div class="d">Shfleto punë me ditë, apliko me një prekje</div></div>
+    </div>
+    <div class="role-card" onclick="chooseRole('business')">
+      <div class="ic">🏪</div>
+      <div><div class="t">Jam biznes / punëdhënës</div><div class="d">Posto punë dhe gjej njerëz brenda ditës</div></div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:6px;" onclick="goLogin()">Ke llogari? Kyçu</button>
+  </div>`;
+}
+
+function renderLogin(){
+  return `
+  <div class="onboard">
+    <div class="brand-mark" style="width:44px;height:44px;font-size:20px;border-radius:12px;margin-bottom:16px;">D</div>
+    <h1 style="font-size:27px;">Kyçu në DayJob</h1>
+    <p class="lead">Fut email-in dhe fjalëkalimin tënd.</p>
+    ${state.authError ? `<div class="test-banner" style="color:var(--danger);border-color:var(--danger);background:rgba(255,92,108,0.1);">${escapeHtml(state.authError)}</div>` : ''}
+    <div class="field"><label>Email</label><input id="lg_email" type="email" autocomplete="username"></div>
+    <div class="field"><label>Fjalëkalimi</label><input id="lg_pass" type="password" autocomplete="current-password"></div>
+    <button class="btn btn-primary" onclick="doLogin()">Kyçu</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="forgotPassword()">Harrove fjalëkalimin?</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="state.authError='';state.screen='onboard';render();">← Kthehu mbrapa</button>
+  </div>`;
+}
+function goLogin(){ state.authError=''; state.screen='login'; render(); }
+
+async function forgotPassword(){
+  const field = document.getElementById('lg_email');
+  const email = (field ? field.value.trim() : '') || prompt('Shkruaj email-in tënd:');
+  if(!email) return;
+  try{
+    await sendPasswordResetEmail(auth, email);
+    toast('U dërgua një email për rivendosjen e fjalëkalimit ✓');
+  }catch(e){ toast('Gabim: '+friendlyAuthError(e.code)); }
+}
+
+async function doLogin(){
+  const email = document.getElementById('lg_email').value.trim();
+  const pass = document.getElementById('lg_pass').value;
+  if(!email || !pass){ toast('Plotëso email-in dhe fjalëkalimin'); return; }
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+    state.authError = '';
+  }catch(e){
+    state.authError = friendlyAuthError(e.code);
+    render();
+  }
+}
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/invalid-email':'Email jo i vlefshëm.',
+    'auth/user-not-found':'S\'ka llogari me këtë email.',
+    'auth/wrong-password':'Fjalëkalim i gabuar.',
+    'auth/invalid-credential':'Email ose fjalëkalim i gabuar.',
+    'auth/email-already-in-use':'Ky email është regjistruar tashmë. Provo të kyçesh.',
+    'auth/weak-password':'Fjalëkalimi duhet të ketë të paktën 6 shkronja/shifra.',
+    'auth/too-many-requests':'Shumë përpjekje — provo përsëri pas pak.'
+  };
+  return map[code] || ('Gabim: '+code);
+}
+
+function renderRegister(){
+  const p = state.profile;
+  return `
+  <div class="onboard" style="justify-content:flex-start; overflow-y:auto; -webkit-overflow-scrolling:touch;">
+    <div class="brand-mark" style="width:44px;height:44px;font-size:20px;border-radius:12px;margin-bottom:16px;">D</div>
+    <h1 style="font-size:27px;">Regjistrohu si ${state.role==='business' ? 'Biznes' : 'Individ'}</h1>
+    <p class="lead" style="margin-bottom:18px;">Krijo llogarinë tënde reale në DayJob.</p>
+    ${state.authError ? `<div class="test-banner" style="color:var(--danger);border-color:var(--danger);background:rgba(255,92,108,0.1);">${escapeHtml(state.authError)}</div>` : ''}
+
+    <div class="field"><label>Emri</label><input id="rg_first" value="${escapeAttr(p.firstName||'')}"></div>
+    <div class="field"><label>Mbiemri</label><input id="rg_last" value="${escapeAttr(p.lastName||'')}"></div>
+    <div class="field"><label>Email</label><input id="rg_email" type="email" autocomplete="username" value="${escapeAttr(p.email||'')}"></div>
+    <div class="field"><label>Fjalëkalimi</label><input id="rg_pass" type="password" autocomplete="new-password" placeholder="Të paktën 6 shkronja/shifra"></div>
+    <div class="field"><label>Telefon</label><input id="rg_phone" value="${escapeAttr(p.phone||'')}"></div>
+    <div class="field">
+      <label for="rg_id">Kartë ID (foto — opsionale, lokale)</label>
+      <label class="file-btn ${p.idCard?'has-file':''}" for="rg_id">${p.idCard ? '✓ Karta ID u ngarkua — ndrysho' : '📎 Zgjidh foto nga galeria'}</label>
+      <input class="visually-hidden" id="rg_id" type="file" accept="image/*" onchange="handleFile(this,'idCard')">
+    </div>
+    ${state.role==='business' ? `
+      <div class="field"><label>Emri i biznesit</label><input id="rg_biz" value="${escapeAttr(p.bizName||'')}"></div>
+      <div class="field"><label>NIPT</label><input id="rg_nipt" placeholder="L•••••••••A" value="${escapeAttr(p.nipt||'')}"></div>
+      ${renderCardBox(p)}
+    ` : ''}
+    <button class="btn btn-primary" onclick="completeRegister()">Krijo llogarinë</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="backToRoleChoice()">← Kthehu mbrapa</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="goLogin()">Ke llogari? Kyçu</button>
+  </div>`;
+}
+function chooseRole(role){
+  state.role = role;
+  state.screen = 'register';
+  render();
+}
+function backToRoleChoice(){
+  state.screen = 'onboard';
+  render();
+}
+
+async function completeRegister(){
+  const p = state.profile;
+  p.firstName = document.getElementById('rg_first').value.trim();
+  p.lastName = document.getElementById('rg_last').value.trim();
+  p.email = document.getElementById('rg_email').value.trim();
+  const pass = document.getElementById('rg_pass').value;
+  p.phone = document.getElementById('rg_phone').value.trim();
+  if(state.role==='business'){
+    p.bizName = document.getElementById('rg_biz').value.trim();
+    p.nipt = document.getElementById('rg_nipt').value.trim();
+  }
+  if(!p.firstName || !p.lastName || !p.email || !p.phone){
+    toast('Plotëso emrin, mbiemrin, email-in dhe telefonin'); return;
+  }
+  if(!pass || pass.length<6){
+    toast('Fjalëkalimi duhet të ketë të paktën 6 shkronja/shifra'); return;
+  }
+  if(state.role==='business' && (!p.bizName || !p.nipt)){
+    toast('Plotëso emrin e biznesit dhe NIPT-in'); return;
+  }
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, p.email, pass);
+    const profileDoc = {
+      role: state.role,
+      firstName: p.firstName, lastName: p.lastName, email: p.email, phone: p.phone,
+      bizName: p.bizName||null, nipt: p.nipt||null,
+      cardLast4: p.cardLast4||null, cardToken: p.cardToken||null, cardBrand: p.cardBrand||null,
+      wallet: 0, completedShifts: 0, cancellations: 0,
+      createdAt: Date.now()
+    };
+    await setDoc(doc(db,'users',cred.user.uid), profileDoc);
+    state.authError = '';
+    toast('Llogaria u krijua ✓');
+    // onAuthStateChanged will take over navigation to 'home'
+  }catch(e){
+    state.authError = friendlyAuthError(e.code);
+    render();
+  }
+}
+
+function logout(){
+  signOut(auth);
+  state = {...state, screen:'onboard', role:null, profile:{}, jobs:[], applications:[], notifications:[], activeJobId:null};
+  render();
+}
+
+function renderTopbar(){
+  const counts = letterCounts();
+  return `
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand"><div class="brand-mark">D</div><div class="brand-name">DayJob</div></div>
+      <div class="bell" onclick="goto('notifications')">🔔${state.notifications.some(n=>!n.read) ? '<span class="dot"></span>' : ''}</div>
+    </div>
+    <div class="search">
+      <span class="ic">🔍</span>
+      <input placeholder="Kërko punë, biznes, kategori..." value="${escapeAttr(state.search)}" oninput="onSearch(this.value)">
+    </div>
+    <div class="letters">
+      ${LETTERS.map(l => `<div class="letter-btn ${counts[l]>0?'has':''} ${state.filterLetter===l?'active':''}" onclick="toggleLetter('${l}')">${l}<span style="opacity:.55;font-size:10px;margin-left:2px">${counts[l]||''}</span></div>`).join('')}
+    </div>
+    <div class="chiprow">
+      <div class="chip ${!state.filterCat?'active':''}" onclick="setFilter('filterCat',null)">Të gjitha</div>
+      ${Object.entries(CATS).map(([k,v]) => `<div class="chip ${state.filterCat===k?'active':''}" onclick="setFilter('filterCat','${k}')"><span class="sw" style="background:${v.color}"></span>${v.label}</div>`).join('')}
+    </div>
+    <div class="chiprow">
+      <select onchange="setFilter('filterCity', this.value||null)" style="background:var(--surface);color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:13px;font-weight:600;">
+        <option value="">Qyteti: të gjitha</option>
+        ${CITIES.map(c=>`<option value="${c}" ${state.filterCity===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <div class="chip ${state.filterDay==='sot'?'active':''}" onclick="setFilter('filterDay', ${state.filterDay==='sot'?'null':"'sot'"})">Sot</div>
+      <div class="chip ${state.filterDay==='nesër'?'active':''}" onclick="setFilter('filterDay', ${state.filterDay==='nesër'?'null':"'nesër'"})">Nesër</div>
+      <div class="chip ${state.filterDay==='javë'?'active':''}" onclick="setFilter('filterDay', ${state.filterDay==='javë'?'null':"'javë'"})">Këtë javë</div>
+      <select onchange="setFilter('sort', this.value)" style="background:var(--surface);color:var(--text-dim);border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:13px;font-weight:600;">
+        <option value="kohe" ${state.sort==='kohe'?'selected':''}>Renditje: kohë</option>
+        <option value="paga" ${state.sort==='paga'?'selected':''}>Renditje: paga</option>
+        <option value="vende" ${state.sort==='vende'?'selected':''}>Renditje: vende bosh</option>
+      </select>
+    </div>
+  </div>`;
+}
+
+function renderContent(){
+  if(state.screen==='home') return renderHome();
+  if(state.screen==='activity') return renderActivity();
+  if(state.screen==='profile') return renderProfile();
+  if(state.screen==='postJob') return renderPostJob();
+  if(state.screen==='notifications') return renderNotifications();
+  return '';
+}
+
+function renderNav(){
+  const items = state.role==='business'
+    ? [['home','🏠','Kërko'],['postJob','➕','Posto'],['activity','📋','Aplikantë'],['profile','👤','Profili']]
+    : [['home','🏠','Kërko'],['activity','📋','Aktiviteti'],['profile','👤','Profili']];
+  return `<div class="navbar">
+    ${items.map(([id,ic,label]) => `<button class="nav-btn ${state.screen===id?'active':''}" onclick="goto('${id}')"><span class="ic">${ic}</span>${label}</button>`).join('')}
+  </div>`;
+}
+
+function renderHome(){
+  const list = filteredJobs();
+  if(list.length===0){
+    return `<div class="empty"><div class="big">🗂️</div>Nuk u gjet asnjë punë me këto filtra.<br>Provo të pastrosh kërkimin ose kthehu më vonë.</div>`;
+  }
+  return list.map(j => renderJobCard(j)).join('');
+}
+
+function renderJobCard(j){
+  const cat = CATS[j.cat];
+  const left = j.people - j.filled;
+  return `
+  <div class="job-card" style="--cat:${cat.color}" onclick="openJob('${j.id}')">
+    <div class="job-main">
+      <div class="job-top">
+        <div>
+          <div class="job-title">${escapeHtml(j.title)}</div>
+          <div class="job-sub">${escapeHtml(j.company)} · ${j.city}</div>
+        </div>
+        <div class="job-pay">${j.pay}L<span style="font-size:12px;color:var(--text-mute)">/orë</span></div>
+      </div>
+      <div class="job-meta">
+        <span class="tag" style="color:${cat.color}">${cat.label}</span>
+        <span class="tag day">${j.day==='sot'?'Sot':j.day==='nesër'?'Nesër':'Këtë javë'}</span>
+        <span class="tag">${j.hours} orë</span>
+        <span class="tag people">${left>0? left+' vende bosh' : 'Plot'}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+const STATUS_LABEL = {
+  pending:{cls:'status-pending', lbl:'Në shqyrtim'},
+  pranuar:{cls:'status-accepted', lbl:'Rezervuar'},
+  ne_progres:{cls:'status-accepted', lbl:'Në turn'},
+  completed:{cls:'status-accepted', lbl:'Përfunduar'},
+  refuzuar:{cls:'status-rejected', lbl:'Refuzuar'},
+  anulluar:{cls:'status-rejected', lbl:'Anulluar'}
+};
+
+function renderActivity(){
+  if(state.role==='business'){
+    const jobs = myPostedJobs();
+    if(jobs.length===0) return `<div class="empty"><div class="big">📋</div>Nuk ke postuar ende asnjë punë.<br>Shko te "Posto" për ta krijuar të parën.</div>`;
+    return `<div class="section-label">Punët e tua (${jobs.length})</div>` + jobs.map(j => {
+      const apps = state.applications.filter(a => a.jobId===j.id);
+      const closed = j.status === 'closed';
+      return `<div class="app-card">
+        <div class="top"><div class="jt">${escapeHtml(j.title)}</div><span class="tag" style="color:${CATS[j.cat].color}">${closed ? 'Mbyllur' : CATS[j.cat].label}</span></div>
+        <div class="meta">${j.city} · ${j.filled}/${j.people} vende të plotësuara</div>
+        ${!closed ? `<div class="action-row"><button class="btn btn-danger btn-sm" onclick="cancelJobPosting('${j.id}')">Mbyll postimin</button></div>` : ''}
+        ${apps.length===0 ? `<div class="meta" style="margin-top:6px;">Ende pa aplikime</div>` : apps.slice().reverse().map(a => renderApplicantRow(a)).join('')}
+      </div>`;
+    }).join('');
+  }
+  const apps = myApplications();
+  if(apps.length===0) return `<div class="empty"><div class="big">📭</div>Nuk ke aplikuar për asnjë punë ende.<br>Shfleto listën dhe apliko me një prekje.</div>`;
+  return `<div class="section-label">Aplikimet e tua (${apps.length})</div>` + apps.slice().reverse().map(a => renderMyApplicationCard(a)).join('');
+}
+
+function renderApplicantRow(a){
+  const st = STATUS_LABEL[a.status] || STATUS_LABEL.pending;
+  const badgeCls = a.workerScoreSnapshot>=4.5 ? 'top' : '';
+  return `
+  <div style="border-top:1px solid var(--line); padding-top:10px; margin-top:10px;">
+    <div class="top" style="margin-bottom:6px;">
+      <div><div style="font-weight:700;font-size:13.5px;">${escapeHtml(a.workerName||'Punëtor')}</div>
+      <span class="score-badge ${badgeCls}" style="margin-top:4px;">⭐ ${a.workerScoreSnapshot||'—'} · ${escapeHtml(a.workerBadgeSnapshot||'Profil i ri')}</span></div>
+      <span class="status-pill ${st.cls}">${st.lbl}</span>
+    </div>
+    ${a.status==='pending' ? `
+      <div class="action-row">
+        <button class="btn btn-primary btn-sm" onclick="businessRespond('${a.id}','pranuar')">Prano</button>
+        <button class="btn btn-ghost btn-sm" onclick="businessRespond('${a.id}','refuzuar')">Refuzo</button>
+      </div>` : ''}
+    ${a.status==='completed' && !a.businessRatingGiven ? `
+      <div style="font-size:12px;color:var(--text-mute);margin-top:6px;">Vlerëso punëtorin:</div>
+      <div class="stars">${[1,2,3,4,5].map(n=>`<button onclick="rateWorker('${a.id}',${n})">${n}★</button>`).join('')}</div>
+    ` : a.businessRatingGiven ? `<div style="font-size:12px;color:var(--text-mute);margin-top:6px;">Vlerësuar prej teje: ${a.businessRatingGiven}★</div>` : ''}
+  </div>`;
+}
+
+function renderMyApplicationCard(a){
+  const job = state.jobs.find(j => j.id===a.jobId);
+  if(!job) return '';
+  const st = STATUS_LABEL[a.status] || STATUS_LABEL.pending;
+  let actions = '';
+  if(a.status==='pending'){
+    actions = `<div class="action-row"><button class="btn btn-danger btn-sm" onclick="cancelApplication('${a.id}')">Anulo aplikimin</button></div>`;
+  } else if(a.status==='pranuar'){
+    actions = `<div class="action-row">
+      <button class="btn btn-primary btn-sm" onclick="checkIn('${a.id}')">📍 Fillo turnin</button>
+      <button class="btn btn-danger btn-sm" onclick="cancelApplication('${a.id}')">Anulo</button>
+    </div>`;
+  } else if(a.status==='ne_progres'){
+    actions = `<div class="action-row"><button class="btn btn-primary btn-sm" onclick="checkOut('${a.id}')">✅ Përfundo turnin</button></div>`;
+  } else if(a.status==='completed'){
+    if(!a.workerRatingGiven){
+      actions = `<div style="font-size:12px;color:var(--text-mute);margin-top:8px;">Vlerëso biznesin:</div>
+      <div class="stars">${[1,2,3,4,5].map(n=>`<button onclick="rateBusiness('${a.id}',${n})">${n}★</button>`).join('')}</div>`;
+    } else {
+      actions = `<div style="font-size:12px;color:var(--teal);margin-top:8px;font-weight:600;">Fitove ${job.pay*job.hours} Lekë · Vlerësove ${a.workerRatingGiven}★</div>`;
+    }
+  }
+  return `<div class="app-card">
+    <div class="top"><div class="jt">${escapeHtml(job.title)}</div><span class="status-pill ${st.cls}">${st.lbl}</span></div>
+    <div class="meta">${escapeHtml(job.company)} · ${job.city} · ${job.pay}L/orë</div>
+    ${actions}
+  </div>`;
+}
+
+function renderCardBox(p){
+  if(p.cardLast4){
+    return `
+    <div class="secure-box">
+      <div class="secure-head"><span class="lock">🔒</span> Kartë e verifikuar <span class="secure-badge">✓ Tokenizuar</span></div>
+      <div class="card-visual">
+        <div class="row"><span>KARTË BIZNESI</span><span>${p.cardBrand||'VISA'}</span></div>
+        <div class="num">•••• •••• •••• ${p.cardLast4}</div>
+        <div class="row"><span>${escapeHtml(p.bizName||p.firstName||'BIZNES')}</span><span>Token: ${p.cardToken}</span></div>
+      </div>
+      <div class="verify-steps">DayJob nuk ruan kurrë numrin e plotë të kartës. Vetëm procesori i pagesave (modalitet <b>TEST</b>) e sheh atë; ne mbajmë vetëm 4 shifrat e fundit dhe një token referimi.</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="resetCard()">Ndrysho kartën</button>
+    </div>`;
+  }
+  return `
+  <div class="secure-box">
+    <div class="secure-head"><span class="lock">🔒</span> Verifikim kartë krediti <span class="secure-badge">Modalitet TEST</span></div>
+    <div class="test-banner">⚠ Demo — asnjë para reale s'lëviz. Përdor numër testimi: 4242 4242 4242 4242</div>
+    <div class="field"><label>Numri i kartës</label><input id="cb_num" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCardNum(this)"></div>
+    <div class="field-row">
+      <div class="field"><label>Skadenca</label><input id="cb_exp" placeholder="MM/VV" maxlength="5" oninput="formatExp(this)"></div>
+      <div class="field"><label>CVC</label><input id="cb_cvc" placeholder="•••" maxlength="4" inputmode="numeric"></div>
+    </div>
+    <button class="btn btn-primary" onclick="tokenizeCard()">Verifiko dhe lidh kartën</button>
+    <div class="verify-steps" style="margin-top:12px;">
+      Kështu funksionon në realitet: <b>1)</b> karta shkon direkt te një procesor i licencuar (p.sh. Stripe), jo te serveri i DayJob · <b>2)</b> ne marrim vetëm një token + 4 shifrat e fundit · <b>3)</b> çdo pagesë verifikohet me 3D Secure nga banka jote.
+    </div>
+  </div>`;
+}
+function formatCardNum(input){
+  let v = input.value.replace(/\D/g,'').slice(0,16);
+  input.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+}
+function formatExp(input){
+  let v = input.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>=3) v = v.slice(0,2)+'/'+v.slice(2);
+  input.value = v;
+}
+async function tokenizeCard(){
+  const num = document.getElementById('cb_num').value.replace(/\D/g,'');
+  const exp = document.getElementById('cb_exp').value;
+  const cvc = document.getElementById('cb_cvc').value;
+  if(num.length<12 || !exp || cvc.length<3){
+    toast('Plotëso të gjitha fushat e kartës'); return;
+  }
+  const last4 = num.slice(-4);
+  state.profile.cardLast4 = last4;
+  state.profile.cardToken = 'tok_test_'+uid();
+  state.profile.cardBrand = num.startsWith('4') ? 'VISA' : num.startsWith('5') ? 'MASTERCARD' : 'KARTË';
+  if(currentUid){
+    await updateDoc(doc(db,'users',currentUid), {cardLast4:last4, cardToken:state.profile.cardToken, cardBrand:state.profile.cardBrand});
+  }
+  toast('Karta u verifikua (test mode) ✓');
+  render();
+}
+async function resetCard(){
+  delete state.profile.cardLast4; delete state.profile.cardToken; delete state.profile.cardBrand;
+  if(currentUid){
+    await updateDoc(doc(db,'users',currentUid), {cardLast4:null, cardToken:null, cardBrand:null});
+  }
+  render();
+}
+
+function renderProfile(){
+  const p = state.profile;
+  const hasBasic = p.firstName && p.email;
+  const photo = `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-size:22px;">${state.role==='business'?'🏪':'🧰'}</div>`;
+  const score = computeScore(p);
+  const badge = getBadge(p);
+  return `
+  <div class="profile-head">
+    ${photo}
+    <div class="info">
+      <div class="name">${hasBasic ? escapeHtml(p.firstName+' '+(p.lastName||'')) : 'Profili yt'}</div>
+      <div class="sub">${hasBasic ? (state.role==='business'?'Llogari biznesi':'Llogari punëtori') : ''}</div>
+    </div>
+  </div>
+
+  ${state.role==='worker' ? `
+  <div class="stat-row">
+    <div class="stat-box"><div class="n">⭐ ${score}</div><div class="l">Besueshmëri</div></div>
+    <div class="stat-box"><div class="n">${p.completedShifts||0}</div><div class="l">Turne të kryera</div></div>
+    <div class="stat-box"><div class="n">${p.cancellations||0}</div><div class="l">Anulime</div></div>
+  </div>
+  <div style="margin:-8px 0 16px;"><span class="score-badge ${badge.cls}">${badge.label}</span></div>
+  <div class="wallet-card">
+    <div class="lbl">PORTOFOLI YT</div>
+    <div class="amt">${p.wallet||0} L</div>
+    <button class="btn btn-primary btn-sm" onclick="withdrawWallet()" ${!(p.wallet>0)?'disabled style="opacity:.5;"':''}>💸 Tërhiq pagesën menjëherë</button>
+    <div style="font-size:11.5px;color:var(--text-mute);margin-top:8px;">Pagesë e menjëhershme (Same-Day Pay) — demo, pa transfertë reale.</div>
+  </div>
+  ` : ''}
+
+  <div class="field"><label>Emri</label><input id="pf_first" value="${escapeAttr(p.firstName||'')}"></div>
+  <div class="field"><label>Mbiemri</label><input id="pf_last" value="${escapeAttr(p.lastName||'')}"></div>
+  <div class="field"><label>Email</label><input value="${escapeAttr(p.email||'')}" disabled style="opacity:.6;"></div>
+  <div class="field"><label>Telefon</label><input id="pf_phone" value="${escapeAttr(p.phone||'')}"></div>
+  <div class="field">
+    <label for="pf_id">Kartë ID (foto — opsionale, lokale)</label>
+    <label class="file-btn ${p.idCard?'has-file':''}" for="pf_id">${p.idCard ? '✓ Karta ID u ngarkua — ndrysho' : '📎 Zgjidh foto nga galeria'}</label>
+    <input class="visually-hidden" id="pf_id" type="file" accept="image/*" onchange="handleFile(this,'idCard')">
+  </div>
+  ${state.role==='business' ? `
+    <div class="field"><label>Emri i biznesit</label><input id="pf_biz" value="${escapeAttr(p.bizName||'')}"></div>
+    <div class="field"><label>NIPT</label><input id="pf_nipt" placeholder="L•••••••••A" value="${escapeAttr(p.nipt||'')}"></div>
+    ${renderCardBox(p)}
+  ` : ''}
+  <button class="btn btn-primary" onclick="saveProfile()">Ruaj profilin</button>
+  <div style="height:14px"></div>
+  <div class="section-label">Statusi</div>
+  <div style="font-size:12.5px;color:var(--text-mute);line-height:1.6;">
+    Llogaria jote është reale (Firebase Authentication) dhe të dhënat e punëve/aplikimeve ruhen në një bazë të dhënash të përbashkët (Firestore) — çdo person që hap DayJob i sheh të njëjtat punë dhe aplikimet e veta. Karta e kreditit mbetet vetëm demonstrim (test mode, jo transaksione reale). Foto e kartës ID ruhet vetëm në këtë pajisje.
+  </div>
+  <div style="height:18px"></div>
+  <button class="btn btn-danger" onclick="logout()">Dil nga llogaria</button>`;
+}
+
+function renderPostJob(){
+  return `
+  <h2 class="title">Posto një punë</h2>
+  <p style="color:var(--text-mute);font-size:13.5px;margin-top:0;">Plotëso detajet — puna shfaqet menjëherë për të gjithë.</p>
+  <div class="field"><label>Titulli i punës</label><input id="nj_title" placeholder="p.sh. Ndihmës kuzhine për fundjavë"></div>
+  <div class="field"><label>Kategoria</label>
+    <select id="nj_cat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Qyteti</label><select id="nj_city">${CITIES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="field"><label>Dita</label><select id="nj_day"><option value="sot">Sot</option><option value="nesër">Nesër</option><option value="javë">Këtë javë</option></select></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Orë pune</label><input id="nj_hours" type="number" min="1" value="6"></div>
+    <div class="field"><label>Paga (Lekë/orë)</label><input id="nj_pay" type="number" min="0" value="600"></div>
+  </div>
+  <div class="field"><label>Numër personash të nevojshëm</label><input id="nj_people" type="number" min="1" value="1"></div>
+  <button class="btn btn-primary" onclick="submitJob()">Posto punën</button>`;
+}
+
+function renderNotifications(){
+  if(state.notifications.length===0) return `<div class="empty"><div class="big">🔕</div>Nuk ka njoftime ende.</div>`;
+  markNotifsRead();
+  return state.notifications.map(n => `
+    <div class="notif-item read">
+      <div class="dot2"></div>
+      <div><div class="txt">${escapeHtml(n.text)}</div><div class="time">${n.time||''}</div></div>
+    </div>`).join('');
+}
+async function markNotifsRead(){
+  const unread = state.notifications.filter(n=>!n.read);
+  for(const n of unread){
+    n.read = true;
+    try{ await updateDoc(doc(db,'users',currentUid,'notifications',n.id), {read:true}); }catch(e){}
+  }
+}
+
+function renderOverlay(){
+  if(!state.activeJobId) return `<div class="overlay hidden"></div>`;
+  const j = state.jobs.find(x => x.id===state.activeJobId);
+  if(!j) return `<div class="overlay hidden"></div>`;
+  const cat = CATS[j.cat];
+  const already = state.applications.find(a => a.jobId===j.id && a.workerUid===currentUid && !['refuzuar','anulluar'].includes(a.status));
+  const left = j.people-j.filled;
+  const isOwner = state.role==='business' && j.postedByUid===currentUid;
+  return `
+  <div class="overlay" onclick="if(event.target===this) closeJob()">
+    <div class="sheet" style="position:relative;">
+      <div class="sheet-close" onclick="closeJob()">✕</div>
+      <div class="sheet-handle"></div>
+      <span class="tag" style="color:${cat.color};margin-bottom:8px;display:inline-block;">${cat.label}</span>
+      <h2 class="title">${escapeHtml(j.title)}</h2>
+      <div style="color:var(--text-dim);font-size:14px;margin-bottom:14px;">${escapeHtml(j.company)} · ${j.city}</div>
+      <div class="job-meta" style="margin-bottom:18px;">
+        <span class="tag day">${j.day==='sot'?'Sot':j.day==='nesër'?'Nesër':'Këtë javë'}</span>
+        <span class="tag">${j.hours} orë</span>
+        <span class="tag">${j.pay} Lekë/orë</span>
+        <span class="tag people">${left>0? left+' vende bosh' : 'Plot'}</span>
+      </div>
+      <div class="row-item"><span class="k">Pagesa totale (parashikuar)</span><span class="v">${j.pay*j.hours} Lekë</span></div>
+      <div class="row-item"><span class="k">Vende gjithsej</span><span class="v">${j.people}</span></div>
+      <div class="row-item" style="border-bottom:none;"><span class="k">Të plotësuara</span><span class="v">${j.filled}</span></div>
+      <div style="height:16px"></div>
+      ${isOwner
+        ? `<div style="color:var(--text-mute);font-size:13px;">Kjo është puna jote e postuar. ${state.applications.filter(a=>a.jobId===j.id).length} aplikim(e) të marra — shiko te "Aplikantë".</div>`
+        : state.role==='business'
+          ? `<div style="color:var(--text-mute);font-size:13px;">Kalo në një llogari Individi për të aplikuar për punë.</div>`
+          : already
+            ? `<button class="btn btn-ghost" disabled style="opacity:.7;">${
+                already.status==='pranuar' ? '✓ Rezervuar — shko te Aktiviteti' :
+                already.status==='ne_progres' ? '📍 Në turn tani' :
+                already.status==='completed' ? '✅ Turn i përfunduar' :
+                'Ke aplikuar — në shqyrtim'
+              }</button>`
+            : left<=0
+              ? `<button class="btn btn-ghost" disabled style="opacity:.6;">Nuk ka vende bosh</button>`
+              : `<button class="btn btn-primary" onclick="applyToJob('${j.id}')">Apliko tani</button>`
+      }
+    </div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------- */
+/* ACTIONS                                                            */
+/* ---------------------------------------------------------------- */
+function goto(screen){
+  state.activeJobId = null;
+  state.screen = screen;
+  render();
+}
+function onSearch(v){ state.search = v; keepScroll(); renderKeepFocus(); }
+function toggleLetter(l){ state.filterLetter = state.filterLetter===l ? null : l; render(); }
+function setFilter(key, val){ state[key] = val; render(); }
+
+function openJob(id){ state.activeJobId = id; render(); }
+function closeJob(){ state.activeJobId = null; render(); }
+
+function handleFile(input, field){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ toast('Foto është shumë e madhe (maksimumi 5MB)'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = e => { state.profile[field] = e.target.result; toast('Karta ID u ngarkua (lokalisht)'); render(); };
+  reader.readAsDataURL(file);
+}
+
+async function saveProfile(){
+  const p = state.profile;
+  p.firstName = document.getElementById('pf_first').value.trim();
+  p.lastName = document.getElementById('pf_last').value.trim();
+  p.phone = document.getElementById('pf_phone').value.trim();
+  const patch = {firstName:p.firstName, lastName:p.lastName, phone:p.phone};
+  if(state.role==='business'){
+    p.bizName = document.getElementById('pf_biz').value.trim();
+    p.nipt = document.getElementById('pf_nipt').value.trim();
+    patch.bizName = p.bizName; patch.nipt = p.nipt;
+  }
+  if(!p.firstName){ toast('Plotëso të paktën emrin'); return; }
+  try{
+    await updateDoc(doc(db,'users',currentUid), patch);
+    toast('Profili u ruajt');
+  }catch(e){ toast('Gabim: '+e.message); }
+  render();
+}
+
+async function addNotifFor(targetUid, text){
+  try{
+    const id = uid();
+    await setDoc(doc(db,'users',targetUid,'notifications',id), {text, read:false, createdAt: Date.now(), time:'Tani'});
+  }catch(e){ /* best-effort */ }
+}
+
+async function applyToJob(jobId){
+  const p = state.profile;
+  const job = state.jobs.find(j=>j.id===jobId);
+  if(!job) return;
+  if(job.postedByUid === currentUid){ toast('Nuk mund të aplikosh për punën tënde'); return; }
+  const already = state.applications.find(a => a.jobId===jobId && a.workerUid===currentUid && !['refuzuar','anulluar'].includes(a.status));
+  if(already){ toast('Ke aplikuar tashmë për këtë punë'); return; }
+  const appId = uid();
+  try{
+    await setDoc(doc(db,'applications',appId), {
+      jobId, workerUid: currentUid, workerEmail:p.email,
+      workerName:(p.firstName+' '+(p.lastName||'')).trim(),
+      workerScoreSnapshot: parseFloat(computeScore(p)),
+      workerBadgeSnapshot: getBadge(p).label,
+      businessUid: job.postedByUid || null,
+      status:'pending', appliedAt: Date.now()
+    });
+    toast('Aplikimi u dërgua ✓');
+    if(job.postedByUid && !job.isSeed){
+      addNotifFor(job.postedByUid, `${p.firstName} aplikoi për "${job.title}".`);
+    }
+    closeJob();
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function businessRespond(appId, decision){
+  const a = state.applications.find(x=>x.id===appId);
+  if(!a) return;
+  let jobTitle = '';
+  try{
+    await runTransaction(db, async (tx) => {
+      const appRef = doc(db,'applications',appId);
+      const appSnap = await tx.get(appRef);
+      if(!appSnap.exists()) throw new Error('Aplikimi nuk ekziston më');
+      const appData = appSnap.data();
+      if(appData.status !== 'pending') throw new Error('Ky aplikim është përpunuar tashmë nga dikush tjetër');
+      const jobRef = doc(db,'jobs', appData.jobId);
+      const jobSnap = await tx.get(jobRef);
+      const job = jobSnap.exists() ? jobSnap.data() : null;
+      jobTitle = job ? job.title : '';
+      if(decision === 'pranuar'){
+        if(!job) throw new Error('Puna nuk ekziston më');
+        // Re-checked INSIDE the transaction so two overlapping accepts can never
+        // both succeed and overbook the shift.
+        if((job.filled||0) >= job.people) throw new Error('Nuk ka më vende bosh për këtë punë');
+        tx.update(jobRef, { filled: (job.filled||0) + 1 });
+      }
+      tx.update(appRef, { status: decision });
+    });
+    addNotifFor(a.workerUid, decision==='pranuar' ? `Aplikimi yt për "${jobTitle}" u pranua! 🎉 Rezervuar.` : `Aplikimi yt për "${jobTitle}" u refuzua.`);
+    toast(decision==='pranuar' ? 'Pranuar ✓' : 'Refuzuar');
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function checkIn(appId){
+  const a = state.applications.find(x=>x.id===appId);
+  if(!a || a.status!=='pranuar'){ toast('Ky turn nuk mund të fillojë tani'); return; }
+  try{
+    await updateDoc(doc(db,'applications',appId), {status:'ne_progres', checkedInAt: Date.now()});
+    toast('Turni filloi 📍');
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function checkOut(appId){
+  let earnings = 0, jobTitle = '', postedByUid = null, isSeed = false, workerName = '';
+  try{
+    await runTransaction(db, async (tx) => {
+      const appRef = doc(db,'applications',appId);
+      const appSnap = await tx.get(appRef);
+      if(!appSnap.exists()) throw new Error('Aplikimi nuk u gjet');
+      const appData = appSnap.data();
+      if(appData.status !== 'ne_progres') throw new Error('Turni nuk është aktiv');
+      workerName = appData.workerName || '';
+      const jobRef = doc(db,'jobs', appData.jobId);
+      const jobSnap = await tx.get(jobRef);
+      const job = jobSnap.exists() ? jobSnap.data() : null;
+      earnings = job ? (job.pay*job.hours) : 0;
+      jobTitle = job ? job.title : '';
+      postedByUid = job ? job.postedByUid : null;
+      isSeed = job ? !!job.isSeed : false;
+      tx.update(appRef, {status:'completed', checkedOutAt: Date.now()});
+      tx.update(doc(db,'users',currentUid), { wallet: increment(earnings), completedShifts: increment(1) });
+    });
+    toast(`Turni përfundoi ✓ +${earnings} Lekë në portofol`);
+    if(postedByUid && !isSeed){
+      addNotifFor(postedByUid, `${workerName} përfundoi turnin "${jobTitle}".`);
+    }
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function cancelApplication(appId){
+  const a = state.applications.find(x=>x.id===appId);
+  if(!a) return;
+  const wasBooked = a.status==='pranuar' || a.status==='ne_progres';
+  let jobTitle = '', postedByUid = null, isSeed = false;
+  try{
+    await runTransaction(db, async (tx) => {
+      const appRef = doc(db,'applications',appId);
+      const appSnap = await tx.get(appRef);
+      if(!appSnap.exists()) return;
+      const appData = appSnap.data();
+      if(['anulluar','refuzuar','completed'].includes(appData.status)) return; // already final, nothing to do
+      tx.update(appRef, {status:'anulluar'});
+      if(wasBooked){
+        const jobRef = doc(db,'jobs', a.jobId);
+        const jobSnap = await tx.get(jobRef);
+        if(jobSnap.exists()){
+          const job = jobSnap.data();
+          jobTitle = job.title; postedByUid = job.postedByUid; isSeed = !!job.isSeed;
+          // clamp at 0 so an out-of-order race can never push the count negative
+          tx.update(jobRef, { filled: Math.max(0, (job.filled||0) - 1) });
+        }
+        tx.update(doc(db,'users',currentUid), { cancellations: increment(1) });
+      }
+    });
+    if(wasBooked){
+      if(postedByUid && !isSeed) addNotifFor(postedByUid, `${a.workerName} anuloi turnin e rezervuar "${jobTitle}".`);
+      toast('Aplikimi u anulua — kjo ul pikët e besueshmërisë');
+    } else {
+      toast('Aplikimi u anulua');
+    }
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function withdrawWallet(){
+  const p = state.profile;
+  if(!(p.wallet>0)) return;
+  const amt = p.wallet;
+  try{
+    await updateDoc(doc(db,'users',currentUid), {wallet:0});
+    toast(`U tërhoqën ${amt} Lekë menjëherë (demo) 💸`);
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function rateBusiness(appId, stars){
+  try{ await updateDoc(doc(db,'applications',appId), {workerRatingGiven:stars}); toast('Faleminderit për vlerësimin!'); }
+  catch(e){ toast('Gabim: '+e.message); }
+}
+async function rateWorker(appId, stars){
+  try{ await updateDoc(doc(db,'applications',appId), {businessRatingGiven:stars}); toast('Vlerësimi u ruajt'); }
+  catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function submitJob(){
+  const title = document.getElementById('nj_title').value.trim();
+  if(!title){ toast('Shkruaj titullin e punës'); return; }
+  const p = state.profile;
+  const job = {
+    title,
+    company: p.bizName || (p.firstName+' Biznes'),
+    cat: document.getElementById('nj_cat').value,
+    city: document.getElementById('nj_city').value,
+    day: document.getElementById('nj_day').value,
+    hours: Math.max(1, parseInt(document.getElementById('nj_hours').value,10) || 1),
+    pay: Math.max(0, parseInt(document.getElementById('nj_pay').value,10) || 0),
+    people: Math.max(1, parseInt(document.getElementById('nj_people').value,10) || 1),
+    filled: 0,
+    status: 'open',
+    postedByUid: currentUid,
+    postedByName: p.bizName || p.firstName,
+    createdAt: Date.now()
+  };
+  try{
+    const id = uid();
+    await setDoc(doc(db,'jobs',id), job);
+    toast('Puna u postua ✓');
+    state.screen = 'home';
+    render();
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+async function cancelJobPosting(jobId){
+  const job = state.jobs.find(j=>j.id===jobId);
+  if(!job || job.postedByUid !== currentUid) return;
+  if(!confirm('Të mbyllet ky postim? Nuk do të shfaqet më te "Kërko".')) return;
+  try{
+    await updateDoc(doc(db,'jobs',jobId), {status:'closed'});
+    toast('Postimi u mbyll');
+  }catch(e){ toast('Gabim: '+e.message); }
+}
+
+function keepScroll(){
+  const c = document.getElementById('content');
+  state._scrollTop = c ? c.scrollTop : 0;
+}
+function renderKeepFocus(){
+  keepScroll();
+  render();
+  const input = document.querySelector('.search input');
+  if(input){ input.focus(); input.selectionStart = input.selectionEnd = input.value.length; }
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* expose functions used by inline HTML event handlers (needed because this runs as an ES module) */
+Object.assign(window, {
+  chooseRole, backToRoleChoice, completeRegister, goLogin, doLogin, logout, forgotPassword,
+  goto, onSearch, toggleLetter, setFilter, openJob, closeJob, handleFile,
+  saveProfile, applyToJob, businessRespond, checkIn, checkOut, cancelApplication,
+  withdrawWallet, rateBusiness, rateWorker, submitJob, cancelJobPosting, formatCardNum, formatExp,
+  tokenizeCard, resetCard, render
+});
+
+render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* offline caching is a nice-to-have, not critical */ });
+  });
+}
+</script>
+</body>
+</html>

@@ -1,17 +1,9 @@
 import { defineConfig } from 'astro/config';
-import netlify from '@astrojs/netlify';
-import react from '@astrojs/react';
-import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
+// DayJob is a fully static, self-contained app served straight out of
+// public/ (public/index.html) — Astro here only exists to build and
+// deploy the static output to Netlify, no SSR/integrations needed.
 export default defineConfig({
-    vite: {
-        plugins: [tailwindcss()]
-    },
-    integrations: [react()],
-    adapter: netlify({
-        devFeatures: {
-            environmentVariables: true
-        }
-    })
+    output: 'static'
 });

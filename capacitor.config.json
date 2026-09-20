@@ -1,0 +1,10 @@
+{
+  "appId": "al.dayjob.app",
+  "appName": "DayJob",
+  "webDir": "dist",
+  "backgroundColor": "#0B0F1A",
+  "server": {
+    "androidScheme": "https",
+    "url": "https://REPLACE-WITH-YOUR-NETLIFY-DOMAIN.netlify.app"
+  }
+}
